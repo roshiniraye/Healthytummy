@@ -210,9 +210,10 @@
             }
 
             try {
-                const response = await fetch(`/api/products/${productId}`);
-                if (!response.ok) throw new Error('Product not found');
-                const product = await response.json();
+                const products = await fetchProducts();
+                const product = products.find(p => p.id === productId);
+
+                if (!product) throw new Error('Product not found');
 
                 // Generate benefits HTML
                 const benefitsHtml = product.benefits.map(b => `<li>${b}</li>`).join('');

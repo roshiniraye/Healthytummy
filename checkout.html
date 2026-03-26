@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Healthytummy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-header {
+            background-color: var(--light-green);
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .checkout-form-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .order-summary {
+            background: var(--light-green);
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+        }
+
+        .order-summary h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .summary-item-name {
+            color: var(--text-dark);
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .summary-totals {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .final-total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark-green);
+            border-top: 2px solid var(--dark-green);
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-place-order {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        /* Success Message Modals */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .success-modal {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<!-- 🌹 Rose Chatbot -->
+<div id="rose-chatbot">
+  <div id="rose-toggle">🌹</div>
+
+  <div id="rose-box">
+    <div id="rose-header">
+      Rose Assistant 🌹
+      <span onclick="toggleChat()">✖</span>
+    </div>
+
+    <div id="rose-body"></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="css/rose.css">
+<script src="js/rose.js"></script>
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-leaf"></i> Healthy<span>tummy</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <a href="cart.html" class="cart-icon">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-count" id="cart-badge">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>Secure Checkout</h1>
+        </div>
+    </div>
+
+    <div class="container checkout-container" id="checkout-view">
+        <div class="checkout-form-container">
+            <h3>Shipping Information</h3>
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" class="form-control" required placeholder="John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" required placeholder="+91 9876543210">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" required placeholder="john@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Delivery Address</label>
+                    <textarea id="address" class="form-control" required placeholder="Street address, Apartment, Suite, etc."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pincode">Pincode</label>
+                        <input type="text" id="pincode" class="form-control" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-rust btn-place-order" id="submit-btn">Continue to Payment</button>
+            </form>
+        </div>
+
+        <div class="order-summary" id="order-summary">
+            <!-- Order summary injected by JS -->
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-overlay" id="success-modal">
+        <div class="success-modal">
+            <i class="fa-solid fa-circle-check success-icon"></i>
+            <h2>Order Placed!</h2>
+            <p style="margin: 15px 0; color: var(--text-light);">Thank you for choosing Healthytummy. Your healthy goodies are on their way!</p>
+            <p><strong>Order ID:</strong> <span id="modal-order-id"></span></p>
+            <button onclick="window.location.href='index.html'" class="btn btn-primary" style="margin-top: 25px; width: 100%;">Continue Shopping</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = getCart();
+            
+            if (cart.length === 0) {
+                document.getElementById('checkout-view').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                        <h2>Your cart is empty</h2>
+                        <p style="margin: 20px 0;">Please add items to your cart before checking out.</p>
+                        <a href="products.html" class="btn btn-primary">Go to Shop</a>
+                    </div>
+                `;
+                return;
+            }
+
+            renderOrderSummary(cart);
+
+            document.getElementById('checkout-form').addEventListener('submit', handleCheckout);
+        });
+
+        function renderOrderSummary(cart) {
+            const container = document.getElementById('order-summary');
+            let subtotal = 0;
+            
+            const itemsHtml = cart.map(item => {
+                const total = item.price * item.quantity;
+                subtotal += total;
+                return `
+                    <div class="summary-item">
+                        <span class="summary-item-name">${item.quantity}x ${item.name}</span>
+                        <span>₹${total}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const shipping = subtotal > 500 ? 0 : 50;
+            const finalTotal = subtotal + shipping;
+
+            container.innerHTML = `
+                <h3>Order Summary</h3>
+                <div style="margin-bottom: 20px;">
+                    ${itemsHtml}
+                </div>
+                <div class="summary-totals">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>₹${subtotal}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Shipping</span>
+                        <span>${shipping === 0 ? 'Free' : '₹' + shipping}</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Total to Pay</span>
+                        <span>₹${finalTotal}</span>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.9rem; color: var(--text-light);">
+                    <i class="fa-solid fa-shield-halved"></i> 100% Secure Checkout<br>
+                    <i class="fa-solid fa-truck-fast" style="margin-top: 10px;"></i> Expected delivery in 3-5 days
+                </div>
+            `;
+        }
+
+        function handleCheckout(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submit-btn');
+            btn.textContent = 'Redirecting...';
+            btn.disabled = true;
+
+            const shippingData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                pincode: document.getElementById('pincode').value
+            };
+
+            // Save shipping data to local storage and redirect to payment.html
+            localStorage.setItem('healthytummy_shipping', JSON.stringify(shippingData));
+            window.location.href = 'payment.html';
+        }
+    </script>
+</body>
+</html>

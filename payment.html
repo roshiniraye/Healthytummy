@@ -337,6 +337,40 @@
                 document.getElementById('gpay-details').classList.add('active');
             }
         }
+        function placeOrder() {
+    // 1. Get cart data
+    const cart = JSON.parse(localStorage.getItem('healthytummy_cart')) || [];
+
+    // 2. Check cart empty
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+    }
+
+    // 3. Create order
+    const order = {
+        id: Date.now(),
+        items: cart,
+        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        date: new Date().toLocaleString()
+    };
+
+    // 4. Get old orders
+    const orders = JSON.parse(localStorage.getItem('healthytummy_orders')) || [];
+
+    // 5. Save order
+    orders.push(order);
+    localStorage.setItem('healthytummy_orders', JSON.stringify(orders));
+
+    // 6. Clear cart
+    localStorage.removeItem('healthytummy_cart');
+
+    // 7. Success message
+    alert("🎉 Order placed successfully!");
+
+    // 8. Redirect
+    window.location.href = "index.html";
+}
 
         function renderOrderSummary(cart) {
             const container = document.getElementById('order-summary');

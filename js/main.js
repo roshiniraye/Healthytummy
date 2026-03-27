@@ -269,6 +269,10 @@ function goToProduct(id) {
     window.location.href = `product-details.html?id=${id}`;
 }
 
+function goToAdmin() {
+    window.location.href = "admin.html";
+}
+
 function showPostAction() {
     appendBotMessage("What would you like to do next?");
     const options = [

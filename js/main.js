@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Fetch products from API (or JSON directly)
 async function fetchProducts() {
     try {
-        const response = await fetch('data/products.json');
+        const response = await fetch('./data/products.json');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         return data;

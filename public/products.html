@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - Healthytummy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-header {
+            background-color: var(--light-green);
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .filter-btn {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--primary-green);
+            color: var(--white);
+            border-color: var(--primary-green);
+        }
+    </style>
+</head>
+<!-- 🌹 Rose Chatbot -->
+<div id="rose-chatbot">
+  <div id="rose-toggle">🌹</div>
+
+  <div id="rose-box">
+    <div id="rose-header">
+      Rose Assistant 🌹
+      <span onclick="toggleChat()">✖</span>
+    </div>
+
+    <div id="rose-body"></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="css/rose.css">
+<script src="js/rose.js"></script>
+<body>
+
+    <!-- Navigation (Copied from index) -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-leaf"></i> Healthy<span>tummy</span>
+            </a>
+            
+            <div class="menu-toggle" id="menu-toggle">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+            
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li class="dropdown">
+                    <a href="products.html" class="active">Products <i class="fa-solid fa-chevron-down" style="font-size: 0.8em;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="products.html?category=Millet Foods">Millet Foods</a>
+                        <a href="products.html?category=Health Mixes">Health Mixes</a>
+                        <a href="products.html?category=Dry Snacks">Dry Snacks</a>
+                        <a href="products.html?category=Herbal Products">Herbal Products</a>
+                    </div>
+                </li>
+                <li><a href="index.html#about">About Us</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <a href="cart.html" class="cart-icon">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-count" id="cart-badge">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h1 id="page-title">Shop All Products</h1>
+            <p>100% natural, healthy, and delicious.</p>
+        </div>
+    </div>
+
+    <section class="container">
+        <div class="filter-container" id="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All Products</button>
+            <button class="filter-btn" data-filter="Millet Foods">Millet Foods</button>
+            <button class="filter-btn" data-filter="Health Mixes">Health Mixes</button>
+            <button class="filter-btn" data-filter="Dry Snacks">Dry Snacks</button>
+            <button class="filter-btn" data-filter="Herbal Products">Herbal Products</button>
+        </div>
+
+        <div class="products-grid" id="all-products-container">
+            <!-- Products will be loaded here -->
+            <p style="text-align: center; grid-column: 1/-1;">Loading products...</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                &copy; 2026 Healthytummy. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('all-products-container');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const pageTitle = document.getElementById('page-title');
+            
+            // Get category from URL if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialCategory = urlParams.get('category');
+            
+            let allProducts = await fetchProducts();
+            
+            function filterAndRender(category) {
+                // Update title
+                pageTitle.textContent = category === 'all' ? 'Shop All Products' : category;
+
+                // Update active button
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if(btn.dataset.filter === category || (category === 'all' && btn.dataset.filter === 'all')) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Filter products
+                let filtered = allProducts;
+                if (category !== 'all') {
+                    filtered = allProducts.filter(p => p.category === category);
+                }
+
+                // Render
+                renderProducts(filtered, container);
+            }
+
+            // Setup button listeners
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterAndRender(btn.dataset.filter);
+                    // Update URL without reloading
+                    const newUrl = btn.dataset.filter === 'all' 
+                        ? window.location.pathname 
+                        : `${window.location.pathname}?category=${btn.dataset.filter}`;
+                    window.history.pushState({path:newUrl}, '', newUrl);
+                });
+            });
+
+            // Initial render
+            if(initialCategory && ['Millet Foods', 'Health Mixes', 'Dry Snacks', 'Herbal Products'].includes(initialCategory)) {
+                filterAndRender(initialCategory);
+            } else {
+                filterAndRender('all');
+            }
+        });
+    </script>
+</body>
+</html>

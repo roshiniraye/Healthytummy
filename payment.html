@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Healthytummy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-header {
+            background-color: var(--light-green);
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .payment-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .payment-methods-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+
+        .payment-methods-container h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .payment-option {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-option:hover {
+            border-color: var(--primary-green);
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary-green);
+            background-color: var(--light-green);
+        }
+
+        .payment-radio {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-green);
+        }
+
+        .payment-info {
+            flex-grow: 1;
+        }
+
+        .payment-title {
+            font-weight: 600;
+            color: var(--dark-green);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* GPay Details Section */
+        .gpay-details {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.3s;
+        }
+
+        .gpay-details.active {
+            display: block;
+        }
+
+        .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            background: var(--white);
+            margin: 0 auto 15px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #ccc;
+        }
+
+        .upi-id {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-green);
+            background: var(--white);
+            padding: 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .order-summary {
+            background: var(--light-green);
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+        }
+
+        .order-summary h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-totals {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .final-total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark-green);
+            border-top: 2px solid var(--dark-green);
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-place-order {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        /* Success Message Modals */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .success-modal {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .payment-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<!-- 🌹 Rose Chatbot -->
+<div id="rose-chatbot">
+  <div id="rose-toggle">🌹</div>
+
+  <div id="rose-box">
+    <div id="rose-header">
+      Rose Assistant 🌹
+      <span onclick="toggleChat()">✖</span>
+    </div>
+
+    <div id="rose-body"></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="css/rose.css">
+<script src="js/rose.js"></script>
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-leaf"></i> Healthy<span>tummy</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <a href="cart.html" class="cart-icon">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-count" id="cart-badge">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>Select Payment Method</h1>
+        </div>
+    </div>
+
+    <div class="container payment-container" id="payment-view">
+        <div class="payment-methods-container">
+            <h3>How would you like to pay?</h3>
+            <form id="payment-form">
+                
+                <!-- Cash on Delivery -->
+                <label class="payment-option selected" id="opt-cod">
+                    <input type="radio" name="payment_method" value="COD" class="payment-radio" checked onchange="togglePayment('COD')">
+                    <div class="payment-info">
+                        <div class="payment-title">
+                            <i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery
+                        </div>
+                        <div class="payment-desc">Pay with cash when your order arrives.</div>
+                    </div>
+                </label>
+
+                <!-- Google Pay -->
+                <label class="payment-option" id="opt-gpay">
+                    <input type="radio" name="payment_method" value="GPAY" class="payment-radio" onchange="togglePayment('GPAY')">
+                    <div class="payment-info">
+                        <div class="payment-title">
+                            <i class="fa-brands fa-google-pay" style="font-size: 1.5rem;"></i> Google Pay (UPI)
+                        </div>
+                        <div class="payment-desc">Scan QR or transfer to our UPI ID.</div>
+                    </div>
+                </label>
+
+                <div class="gpay-details" id="gpay-details">
+                    <p style="margin-bottom: 15px; font-weight: 600;">Scan to Pay with GPay</p>
+                    <div class="qr-placeholder">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Or use our UPI ID:</p>
+                    <div class="upi-id">healthytummy@okaxis</div>
+                    <p style="margin-top: 15px; font-size: 0.85rem; color: var(--rust-orange);">
+                        <i class="fa-solid fa-circle-info"></i> Your order will be confirmed once payment is verified.
+                    </p>
+                </div>
+
+                <button type="submit" class="btn btn-rust btn-place-order" id="submit-btn" style="margin-top: 30px;">Complete Order</button>
+            </form>
+        </div>
+
+        <div class="order-summary" id="order-summary">
+            <!-- Order summary injected by JS -->
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-overlay" id="success-modal">
+        <div class="success-modal">
+            <i class="fa-solid fa-circle-check success-icon"></i>
+            <h2>Order Complete!</h2>
+            <p style="margin: 15px 0; color: var(--text-light);">Thank you for choosing Healthytummy. Your healthy goodies are on their way!</p>
+            <p><strong>Order ID:</strong> <span id="modal-order-id"></span></p>
+            <p><strong>Payment Method:</strong> <span id="modal-payment-method"></span></p>
+            <button onclick="window.location.href='index.html'" class="btn btn-primary" style="margin-top: 25px; width: 100%;">Continue Shopping</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = getCart();
+            const shippingData = localStorage.getItem('healthytummy_shipping');
+            
+            if (cart.length === 0 || !shippingData) {
+                // If they sneaked here without a cart or shipping info, redirect
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            renderOrderSummary(cart);
+            document.getElementById('payment-form').addEventListener('submit', finalizeOrder);
+        });
+
+        function togglePayment(method) {
+            // Update styling
+            document.getElementById('opt-cod').classList.remove('selected');
+            document.getElementById('opt-gpay').classList.remove('selected');
+            
+            if (method === 'COD') {
+                document.getElementById('opt-cod').classList.add('selected');
+                document.getElementById('gpay-details').classList.remove('active');
+            } else {
+                document.getElementById('opt-gpay').classList.add('selected');
+                document.getElementById('gpay-details').classList.add('active');
+            }
+        }
+
+        function renderOrderSummary(cart) {
+            const container = document.getElementById('order-summary');
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                subtotal += (item.price * item.quantity);
+            });
+
+            const shipping = subtotal > 500 ? 0 : 50;
+            const finalTotal = subtotal + shipping;
+
+            // Also retrieve shipping name to show a personalized touch
+            const shippingData = JSON.parse(localStorage.getItem('healthytummy_shipping'));
+
+            container.innerHTML = `
+                <h3>Order Summary</h3>
+                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);">
+                    <p style="font-weight:600; font-size:0.95rem;">Delivering to:</p>
+                    <p style="color:var(--text-light); font-size:0.9rem;">${shippingData.name}<br>${shippingData.city}, ${shippingData.pincode}</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight:600; margin-bottom: 15px;">
+                    <span>${cart.length} item(s)</span>
+                </div>
+                <div class="summary-totals" style="border:none; padding:0; margin:0;">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>₹${subtotal}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Shipping</span>
+                        <span>${shipping === 0 ? 'Free' : '₹' + shipping}</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Total to Pay</span>
+                        <span id="display-final-total">₹${finalTotal}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function finalizeOrder(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submit-btn');
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            const cart = getCart();
+            const shippingData = JSON.parse(localStorage.getItem('healthytummy_shipping'));
+            
+            // Get selected payment method
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+            const orderData = {
+                customer: shippingData,
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                paymentMethod: paymentMethod === 'GPAY' ? 'Google Pay' : 'Cash on Delivery'
+            };
+
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Empty the cart & clear shipping info
+                    saveCart([]);
+                    localStorage.removeItem('healthytummy_shipping');
+                    
+                    // Show success modal
+                    document.getElementById('modal-order-id').textContent = result.orderId;
+                    document.getElementById('modal-payment-method').textContent = orderData.paymentMethod;
+                    document.getElementById('success-modal').style.display = 'flex';
+                } else {
+                    alert('Order failed: ' + result.error);
+                    btn.textContent = 'Complete Order';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                alert('An error occurred while placing your order. Please try again.');
+                btn.textContent = 'Complete Order';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

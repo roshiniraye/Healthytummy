@@ -309,161 +309,101 @@
     </div>
 
     <script src="js/main.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cart = getCart();
-            const shippingData = localStorage.getItem('healthytummy_shipping');
-            
-            if (cart.length === 0 || !shippingData) {
-                // If they sneaked here without a cart or shipping info, redirect
-                window.location.href = 'cart.html';
-                return;
-            }
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cart = getCart();
+    const shippingData = localStorage.getItem('healthytummy_shipping');
 
-            renderOrderSummary(cart);
-            document.getElementById('payment-form').addEventListener('submit', finalizeOrder);
-        });
-
-        function togglePayment(method) {
-            // Update styling
-            document.getElementById('opt-cod').classList.remove('selected');
-            document.getElementById('opt-gpay').classList.remove('selected');
-            
-            if (method === 'COD') {
-                document.getElementById('opt-cod').classList.add('selected');
-                document.getElementById('gpay-details').classList.remove('active');
-            } else {
-                document.getElementById('opt-gpay').classList.add('selected');
-                document.getElementById('gpay-details').classList.add('active');
-            }
-        }
-        function placeOrder() {
-    // 1. Get cart data
-    const cart = JSON.parse(localStorage.getItem('healthytummy_cart')) || [];
-
-    // 2. Check cart empty
-    if (cart.length === 0) {
-        alert("Your cart is empty!");
+    if (cart.length === 0 || !shippingData) {
+        window.location.href = 'cart.html';
         return;
     }
 
-    // 3. Create order
+    renderOrderSummary(cart);
+    document.getElementById('payment-form').addEventListener('submit', finalizeOrder);
+});
+
+// Toggle payment UI
+function togglePayment(method) {
+    document.getElementById('opt-cod').classList.remove('selected');
+    document.getElementById('opt-gpay').classList.remove('selected');
+
+    if (method === 'COD') {
+        document.getElementById('opt-cod').classList.add('selected');
+        document.getElementById('gpay-details').classList.remove('active');
+    } else {
+        document.getElementById('opt-gpay').classList.add('selected');
+        document.getElementById('gpay-details').classList.add('active');
+    }
+}
+
+// Render order summary
+function renderOrderSummary(cart) {
+    const container = document.getElementById('order-summary');
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        subtotal += item.price * item.quantity;
+    });
+
+    const shipping = subtotal > 500 ? 0 : 50;
+    const total = subtotal + shipping;
+
+    const shippingData = JSON.parse(localStorage.getItem('healthytummy_shipping'));
+
+    container.innerHTML = `
+        <h3>Order Summary</h3>
+        <p>${shippingData.name}, ${shippingData.city}</p>
+        <p>${cart.length} item(s)</p>
+
+        <div>
+            <p>Subtotal: ₹${subtotal}</p>
+            <p>Shipping: ${shipping === 0 ? 'Free' : '₹' + shipping}</p>
+            <h3>Total: ₹${total}</h3>
+        </div>
+    `;
+}
+
+// ✅ FINAL ORDER FUNCTION (NO BACKEND)
+function finalizeOrder(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+
+    const cart = getCart();
+    const shippingData = JSON.parse(localStorage.getItem('healthytummy_shipping'));
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+    // Create order
     const order = {
-        id: Date.now(),
+        id: "ORD" + Date.now(),
+        customer: shippingData,
         items: cart,
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        payment: paymentMethod,
         date: new Date().toLocaleString()
     };
 
-    // 4. Get old orders
+    // Save in localStorage
     const orders = JSON.parse(localStorage.getItem('healthytummy_orders')) || [];
-
-    // 5. Save order
     orders.push(order);
     localStorage.setItem('healthytummy_orders', JSON.stringify(orders));
 
-    // 6. Clear cart
-    localStorage.removeItem('healthytummy_cart');
+    // Clear cart
+    saveCart([]);
+    localStorage.removeItem('healthytummy_shipping');
 
-    // 7. Success message
-    alert("🎉 Order placed successfully!");
+    // Show success modal
+    document.getElementById('modal-order-id').textContent = order.id;
+    document.getElementById('modal-payment-method').textContent = order.payment;
+    document.getElementById('success-modal').style.display = 'flex';
 
-    // 8. Redirect
-    window.location.href = "index.html";
+    btn.textContent = 'Complete Order';
+    btn.disabled = false;
 }
-
-        function renderOrderSummary(cart) {
-            const container = document.getElementById('order-summary');
-            let subtotal = 0;
-            
-            cart.forEach(item => {
-                subtotal += (item.price * item.quantity);
-            });
-
-            const shipping = subtotal > 500 ? 0 : 50;
-            const finalTotal = subtotal + shipping;
-
-            // Also retrieve shipping name to show a personalized touch
-            const shippingData = JSON.parse(localStorage.getItem('healthytummy_shipping'));
-
-            container.innerHTML = `
-                <h3>Order Summary</h3>
-                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);">
-                    <p style="font-weight:600; font-size:0.95rem;">Delivering to:</p>
-                    <p style="color:var(--text-light); font-size:0.9rem;">${shippingData.name}<br>${shippingData.city}, ${shippingData.pincode}</p>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-weight:600; margin-bottom: 15px;">
-                    <span>${cart.length} item(s)</span>
-                </div>
-                <div class="summary-totals" style="border:none; padding:0; margin:0;">
-                    <div class="total-row">
-                        <span>Subtotal</span>
-                        <span>₹${subtotal}</span>
-                    </div>
-                    <div class="total-row">
-                        <span>Shipping</span>
-                        <span>${shipping === 0 ? 'Free' : '₹' + shipping}</span>
-                    </div>
-                    <div class="total-row final-total">
-                        <span>Total to Pay</span>
-                        <span id="display-final-total">₹${finalTotal}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function finalizeOrder(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('submit-btn');
-            btn.textContent = 'Processing...';
-            btn.disabled = true;
-
-            const cart = getCart();
-            const shippingData = JSON.parse(localStorage.getItem('healthytummy_shipping'));
-            
-            // Get selected payment method
-            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-
-            const orderData = {
-                customer: shippingData,
-                items: cart,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                paymentMethod: paymentMethod === 'GPAY' ? 'Google Pay' : 'Cash on Delivery'
-            };
-
-            try {
-                const response = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(orderData)
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Empty the cart & clear shipping info
-                    saveCart([]);
-                    localStorage.removeItem('healthytummy_shipping');
-                    
-                    // Show success modal
-                    document.getElementById('modal-order-id').textContent = result.orderId;
-                    document.getElementById('modal-payment-method').textContent = orderData.paymentMethod;
-                    document.getElementById('success-modal').style.display = 'flex';
-                } else {
-                    alert('Order failed: ' + result.error);
-                    btn.textContent = 'Complete Order';
-                    btn.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error placing order:', error);
-                alert('An error occurred while placing your order. Please try again.');
-                btn.textContent = 'Complete Order';
-                btn.disabled = false;
-            }
-        }
-    </script>
+</script>
 </body>
 </html>

@@ -384,7 +384,7 @@ function finalizeOrder(e) {
         items: cart,
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         payment: paymentMethod,
-        date: new Date().toLocaleString()
+        date: new Date().toISOString()
     };
 
     // Save in localStorage

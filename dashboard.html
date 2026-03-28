@@ -21,6 +21,12 @@ if(localStorage.getItem("isAdmin") !== "true") {
     window.location.href = "admin.html";
 }
 
+// Load orders initially
+document.addEventListener("DOMContentLoaded", () => {
+    const orders = JSON.parse(localStorage.getItem('healthytummy_orders')) || [];
+    loadOrders(orders);
+});
+
 function loadOrders(data) {
     const container = document.getElementById('orders');
 
@@ -32,9 +38,16 @@ function loadOrders(data) {
     container.innerHTML = data.map(order => `
         <div style="border:1px solid #ccc; padding:15px; margin:10px;">
             <p><b>Order ID:</b> ${order.id}</p>
-            <p><b>Date:</b> ${order.date}</p>
+            <p><b>Date:</b> ${new Date(order.date).toLocaleDateString()}</p>
             <p><b>Total:</b> ₹${order.total}</p>
-            <p><b>Payment:</b> ${order.paymentMethod}</p>
+            <p><b>Payment:</b> ${order.payment}</p>
+
+            <hr>
+
+            <p><b>Customer Name:</b> ${order.customer?.name || 'N/A'}</p>
+            <p><b>Phone:</b> ${order.customer?.phone || 'N/A'}</p>
+            <p><b>Address:</b> ${order.customer?.address || 'N/A'}</p>
+            <p><b>City:</b> ${order.customer?.city || 'N/A'}</p>
         </div>
     `).join('');
 }
@@ -45,29 +58,25 @@ function filterOrders() {
     const selectedDate = document.getElementById('filter-date').value;
     const selectedMonth = document.getElementById('filter-month').value;
 
-    let filtered = orders;
+    let filtered = orders.filter(order => {
+        const d = new Date(order.date);
 
-    // ✅ Filter by Date
-    if (selectedDate) {
-        filtered = filtered.filter(order => {
-            const orderDate = new Date(order.date).toISOString().split('T')[0];
-            return orderDate === selectedDate;
-        });
-    }
+        // LOCAL date (important fix)
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
 
-    // ✅ Filter by Month
-    if (selectedMonth) {
-        filtered = filtered.filter(order => {
-            const orderDate = new Date(order.date);
-            const month = (orderDate.getMonth() + 1).toString().padStart(2, '0');
-            return month === selectedMonth;
-        });
-    }
+        const orderDate = `${year}-${month}-${day}`;
+        const orderMonth = `${year}-${month}`;
 
-    renderOrders(filtered);
+        return (
+            (!selectedDate || orderDate === selectedDate) &&
+            (!selectedMonth || orderMonth === selectedMonth)
+        );
+    });
+
+    loadOrders(filtered); // ✅ correct function
 }
-// Load all initially
-loadOrders(JSON.parse(localStorage.getItem('healthytummy_orders')) || []);
 </script>
 
 </body>

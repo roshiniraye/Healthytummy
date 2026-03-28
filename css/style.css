@@ -603,7 +603,7 @@ h1, h2, h3, h4 {
 
 .rose-header {
     background-color: var(rgb(218, 89, 89));
-    color: var(--white);
+    color: var(light red);
     padding: 15px;
     font-weight: 600;
     display: flex;

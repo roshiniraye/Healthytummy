@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h2 style="text-align:center;">Admin Dashboard</h2>
+
+<div style="text-align:center; margin:20px;">
+    <input type="date" id="filter-date">
+    <input type="month" id="filter-month">
+    <button onclick="filterOrders()">Filter</button>
+</div>
+
+<div id="orders"></div>
+
+<script>
+if(localStorage.getItem("isAdmin") !== "true") {
+    window.location.href = "admin.html";
+}
+
+function loadOrders(data) {
+    const container = document.getElementById('orders');
+
+    if(data.length === 0) {
+        container.innerHTML = "<p style='text-align:center;'>No orders found</p>";
+        return;
+    }
+
+    container.innerHTML = data.map(order => `
+        <div style="border:1px solid #ccc; padding:15px; margin:10px;">
+            <p><b>Order ID:</b> ${order.id}</p>
+            <p><b>Date:</b> ${order.date}</p>
+            <p><b>Total:</b> ₹${order.total}</p>
+            <p><b>Payment:</b> ${order.paymentMethod}</p>
+        </div>
+    `).join('');
+}
+
+function filterOrders() {
+    const allOrders = JSON.parse(localStorage.getItem('healthytummy_orders')) || [];
+    const date = document.getElementById('filter-date').value;
+    const month = document.getElementById('filter-month').value;
+
+    let filtered = allOrders;
+
+    if(date) {
+        filtered = filtered.filter(o => o.date.includes(date));
+    }
+
+    if(month) {
+        filtered = filtered.filter(o => o.date.includes(month));
+    }
+
+    loadOrders(filtered);
+}
+
+// Load all initially
+loadOrders(JSON.parse(localStorage.getItem('healthytummy_orders')) || []);
+</script>
+
+</body>
+</html>

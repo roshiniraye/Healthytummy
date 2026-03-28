@@ -40,23 +40,32 @@ function loadOrders(data) {
 }
 
 function filterOrders() {
-    const allOrders = JSON.parse(localStorage.getItem('healthytummy_orders')) || [];
-    const date = document.getElementById('filter-date').value;
-    const month = document.getElementById('filter-month').value;
+    const orders = JSON.parse(localStorage.getItem('healthytummy_orders')) || [];
 
-    let filtered = allOrders;
+    const selectedDate = document.getElementById('filter-date').value;
+    const selectedMonth = document.getElementById('filter-month').value;
 
-    if(date) {
-        filtered = filtered.filter(o => o.date.includes(date));
+    let filtered = orders;
+
+    // ✅ Filter by Date
+    if (selectedDate) {
+        filtered = filtered.filter(order => {
+            const orderDate = new Date(order.date).toISOString().split('T')[0];
+            return orderDate === selectedDate;
+        });
     }
 
-    if(month) {
-        filtered = filtered.filter(o => o.date.includes(month));
+    // ✅ Filter by Month
+    if (selectedMonth) {
+        filtered = filtered.filter(order => {
+            const orderDate = new Date(order.date);
+            const month = (orderDate.getMonth() + 1).toString().padStart(2, '0');
+            return month === selectedMonth;
+        });
     }
 
-    loadOrders(filtered);
+    renderOrders(filtered);
 }
-
 // Load all initially
 loadOrders(JSON.parse(localStorage.getItem('healthytummy_orders')) || []);
 </script>

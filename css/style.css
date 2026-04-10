@@ -277,6 +277,11 @@ h1, h2, h3, h4 {
     background-color: var(--light-green);
     font-size: 4rem;
     color: var(--primary-green);
+    width: 100%;
+    overflow: hidden;
+    object-fit: cover;      /* fills the box, crops edges evenly */
+    object-position: center; /* centres the image */
+    border-radius: 10px;
 }
 
 .category-card h3 {
@@ -285,6 +290,7 @@ h1, h2, h3, h4 {
     font-size: 1.4rem;
     color: var(--dark-green);
     border-top: 3px solid var(--primary-green);
+    overflow: hidden;
 }
 
 /* Products Grid */
